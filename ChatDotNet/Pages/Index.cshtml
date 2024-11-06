@@ -1,28 +1,63 @@
 ﻿@page
-<div class="container">
-    <div class="row p-1">
-        <div class="col-1">User</div>
-        <div class="col-5"><input type="text" id="userInput" /></div>
-    </div>
-    <div class="row p-1">
-        <div class="col-1">Message</div>
-        <div class="col-5"><input type="text" class="w-100" id="messageInput" /></div>
-    </div>
-    <div class="row p-1">
-        <div class="col-6 text-end">
-            <input type="button" id="sendButton" value="Send Message" />
+<div class="container mt-5">
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="userInput" class="form-label">User</label>
+        </div>
+        <div class="col-10">
+            <input type="text" id="userInput" class="form-control" />
         </div>
     </div>
-    <div class="row p-1">
-        <div class="col-6">
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="messageInput" class="form-label">Message</label>
+        </div>
+        <div class="col-10">
+            <input type="text" id="messageInput" class="form-control" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2">
+            <label for="groupSelect" class="form-label">Group</label>
+        </div>
+        <div class="col-10">
+            <select id="groupSelect" class="form-select" onchange="toggleCustomGroupInput()">
+                <option value="Global">Global</option>
+                <option value="Jogos">Jogos</option>
+                <option value="Filmes">Filmes</option>
+                <option value="Cinema">Cinema</option>
+                <option value="Esportes">Esportes</option>
+                <option value="Custom">Custom</option>
+            </select>
+            <input type="text" id="customGroupInput" class="form-control mt-2" placeholder="Enter custom group" style="display: none;" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 text-end">
+            <button id="sendButton" class="btn btn-primary">Send Message</button>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12">
             <hr />
         </div>
     </div>
-    <div class="row p-1">
-        <div class="col-6">
-            <ul id="messagesList"></ul>
+    <div class="row mb-3">
+        <div class="col-12">
+            <ul id="messagesList" class="list-group"></ul>
         </div>
     </div>
 </div>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/chat.js"></script>
+<script>
+    function toggleCustomGroupInput() {
+        var groupSelect = document.getElementById("groupSelect");
+        var customGroupInput = document.getElementById("customGroupInput");
+        if (groupSelect.value === "Custom") {
+            customGroupInput.style.display = "block";
+        } else {
+            customGroupInput.style.display = "none";
+        }
+    }
+</script>

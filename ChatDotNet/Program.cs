@@ -1,10 +1,15 @@
+using ChatDotNet.Properties.Data;
 using ChatDotNet.Properties.Entities;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseInMemoryDatabase("TestDb"));
 
 var app = builder.Build();
 
