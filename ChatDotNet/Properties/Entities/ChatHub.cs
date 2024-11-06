@@ -7,7 +7,7 @@ namespace ChatDotNet.Properties.Entities;
 public class ChatHub : Hub
 {
     
-    private readonly ApplicationDbContext _context; //DB context
+    private readonly ApplicationDbContext _context;
 
     public ChatHub(ApplicationDbContext context)
     {
@@ -15,8 +15,6 @@ public class ChatHub : Hub
     }
     public override Task OnConnectedAsync()
     { 
-        //get Logged user name.
-        var connectionId = Context.ConnectionId;
         SignalRUser user = new SignalRUser() { ConnectionID = Context.ConnectionId };
         _context.SignalRUser.Add(user);
         _context.SaveChanges();
@@ -25,19 +23,20 @@ public class ChatHub : Hub
     } 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        var connectionId = Context.ConnectionId; 
-        var user =  _context.SignalRUser.Where(c => c.ConnectionID == connectionId).FirstOrDefault();
+        var user =  _context.SignalRUser.Where(c => c.ConnectionID == Context.ConnectionId).FirstOrDefault();
         var userGroup = _context.SignalRGroup_SignalRUser.Where(c => c.SignalRUserConnectionID == user.ConnectionID).FirstOrDefault();
-        //remove user if user disconnected
+        
         if(user != null)
         {
             _context.SignalRUser.Remove(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         if(user != null && userGroup != null)
         {
+            await Clients.Group(userGroup.SignalRGroupName).SendAsync("Send",
+                $"({Context.ConnectionId}) has leave the group {userGroup.SignalRGroupName}.");
             _context.SignalRGroup_SignalRUser.Remove(userGroup);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -45,6 +44,9 @@ public class ChatHub : Hub
     
     public async Task SendMessage(string user, string message, string group)
     {
+        var signalRMessage = new SignalRMessage() { User = user, Message = message, Group = group, Date = DateTime.Now };
+        await _context.SignalRMessage.AddAsync(signalRMessage);
+        await _context.SaveChangesAsync();
         await Clients.Group(group).SendAsync("ReceiveMessage", user, message, group);
     }
     
@@ -56,10 +58,7 @@ public class ChatHub : Hub
     public async Task<string> GetGroup()
     {
         var userGroup = await _context.SignalRGroup_SignalRUser.Where(c => c.SignalRUserConnectionID == Context.ConnectionId).FirstOrDefaultAsync();
-        
-        
-        
-        return userGroup != null ? userGroup.SignalRGroupName : null;
+        return userGroup != null ? userGroup.SignalRGroupName : "";
     }
     
     public async Task AddToGroup(string group, string name)
@@ -80,5 +79,11 @@ public class ChatHub : Hub
         }
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, group);
         await Clients.Group(group).SendAsync("Send", $"{name} ({Context.ConnectionId}) has leave the group {group}.");
+    }
+    
+    public async Task<List<SignalRMessage>?> GetMessages(string group)
+    {
+        var messages = await _context.SignalRMessage.Where(c => c.Group == group).Take(50).OrderByDescending(c => c.Date).ToListAsync();
+        return messages.Count > 0 ? messages : null;
     }
 }

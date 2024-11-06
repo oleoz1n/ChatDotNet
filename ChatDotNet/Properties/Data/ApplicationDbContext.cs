@@ -13,4 +13,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<SignalRUser> SignalRUser { get; set; }
     public DbSet<SignalRGroup> SignalRGroup { get; set; }
     public DbSet<SignalRGroup_SignalRUser> SignalRGroup_SignalRUser { get; set; }
+    public DbSet<SignalRMessage> SignalRMessage { get; set; }
 }

@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatDotNet.Properties.Entities;
 
-public class SignalRGroup_SignalRUser
+public class SignalRMessage
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    public string SignalRGroupName { get; set; }
-    public SignalRGroup SignalRGroup { get; set; }
-    public string SignalRUserConnectionID { get; set; }
-    public SignalRUser SignalRUser { get; set; }
+    public string User { get; set; }
+    public string Message { get; set; }
+    public string Group { get; set; }
+    public DateTime Date { get; set; }
 }
